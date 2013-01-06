@@ -930,7 +930,7 @@ prepare(Ftab0, #we{}=We, St, Attr) ->
     prepare_1(Ftab, We, St, Attr).
 
 prepare_1(Ftab, We, St, Attr) ->
-    MatFaces = wings_facemat:mat_faces(Ftab, We),
+    MatFaces = mat_faces(Ftab, We),
     case wings_va:any_attributes(We) of
 	false when Attr =:= undefined ->
 	    %% Since there are no vertex attributes,
@@ -976,3 +976,11 @@ prepare_3([], Attr) -> Attr.
 prepare_4(Attr, plain) -> Attr;
 prepare_4(uv, color) -> color_uv;
 prepare_4(uv_tangent, color) -> color_uv_tangent.
+
+mat_faces(Ftab, We) ->
+    case wings_pref:get_value(show_materials) of
+	false ->
+	    [{default,Ftab}];
+	true ->
+	    wings_facemat:mat_faces(Ftab, We)
+    end.
