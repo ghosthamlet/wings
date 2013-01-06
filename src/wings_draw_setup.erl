@@ -17,7 +17,7 @@
 
 -export([work/2,smooth/2,prepare/3,prepare/4,flat_faces/2]).
 -export([enable_pointers/2,disable_pointers/2]).
--export([face_vertex_count/1]).
+-export([face_vertex_count/1,has_active_color/1]).
 %% Tangent calcs
 -export([add_ts/5, add_tangents/3]).
 
@@ -83,14 +83,18 @@ sub_divide(N, We) ->
 %%% Help functions to activate and disable buffer pointers.
 %%%
 
-%% enable_pointers(#vab{}, [ExtraPointer]) -> [boolean()]
+has_active_color(#vab{face_vc=Color}) ->
+    Color =/= none.
+
+%% enable_pointers(#vab{}, [ExtraPointer]) ->
 %%    ExtraPointer = face_normals | vertex_normals | colors | uvs | tangents
 %%  Enable the vertex buffer pointer, and optionally other pointers.
 
 enable_pointers(#vab{face_vs={Stride,BinVs}}=Vab, Extra) ->
     gl:vertexPointer(3, ?GL_FLOAT, Stride, BinVs),
     gl:enableClientState(?GL_VERTEX_ARRAY),
-    [enable_pointer(What, Vab) || What <- Extra].
+    [enable_pointer(What, Vab) || What <- Extra],
+    ok.
 
 %% disable_pointers(#vab{}, [ExtraPointer])
 %%    ExtraPointer = face_normals | vertex_normals | colors | uvs | tangents
@@ -108,36 +112,32 @@ enable_pointer(vertex_normals, #vab{face_sn=Ns}) ->
 enable_pointer(colors, #vab{face_vc=FaceCol}) ->
     case FaceCol of
 	none ->
-	    false;
+	    ok;
 	{Stride,Color} ->
 	    gl:colorPointer(3, ?GL_FLOAT, Stride, Color),
-	    gl:enableClientState(?GL_COLOR_ARRAY),
-	    true
+	    gl:enableClientState(?GL_COLOR_ARRAY)
     end;
 enable_pointer(uvs, #vab{face_uv=FaceUV}) ->
     case FaceUV of
 	none ->
-	    false;
+	    ok;
 	{Stride,UV} ->
 	    gl:texCoordPointer(2, ?GL_FLOAT, Stride, UV),
-	    gl:enableClientState(?GL_TEXTURE_COORD_ARRAY),
-	    true
+	    gl:enableClientState(?GL_TEXTURE_COORD_ARRAY)
     end;
 enable_pointer(tangents, #vab{face_ts=FaceTs}) ->
     case FaceTs of
 	none ->
-	    false;
+	    ok;
 	{Stride,Ts} ->
 	    gl:vertexAttribPointer(?TANGENT_ATTR, 4, ?GL_FLOAT,
 				   ?GL_FALSE, Stride, Ts),
-	    gl:enableVertexAttribArray(?TANGENT_ATTR),
-	    true
+	    gl:enableVertexAttribArray(?TANGENT_ATTR)
     end.
 
 enable_normal_pointer({Stride,Ns}) ->
     gl:normalPointer(?GL_FLOAT, Stride, Ns),
-    gl:enableClientState(?GL_NORMAL_ARRAY),
-    true.
+    gl:enableClientState(?GL_NORMAL_ARRAY).
 
 disable_pointer(face_normals, _) ->
     gl:disableClientState(?GL_NORMAL_ARRAY);

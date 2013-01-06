@@ -912,7 +912,8 @@ draw_flat_faces(#dlo{vab=Vab}, St) ->
     draw_flat_faces(Vab, St);
 draw_flat_faces(#vab{mat_map=MatMap}=D, #st{mat=Mtab}) ->
     Extra = [colors,face_normals,uvs,tangents],
-    [ActiveColor|_] = wings_draw_setup:enable_pointers(D, Extra),
+    ActiveColor = wings_draw_setup:has_active_color(D),
+    wings_draw_setup:enable_pointers(D, Extra),
     Dl = gl:genLists(1),
     gl:newList(Dl, ?GL_COMPILE),
     draw_mat_faces(MatMap, Mtab, ActiveColor),
@@ -929,7 +930,8 @@ draw_smooth_faces(#dlo{vab=Vab},St) ->
 
 draw_smooth_faces(#vab{mat_map=MatMap}=D, #st{mat=Mtab}) ->
     Extra = [colors,vertex_normals,uvs,tangents],
-    [ActiveColor|_] = wings_draw_setup:enable_pointers(D, Extra),
+    ActiveColor = wings_draw_setup:has_active_color(D),
+    wings_draw_setup:enable_pointers(D, Extra),
 
     %% Partition into transparent and solid material face groups.
     {Transparent,Solid} =
